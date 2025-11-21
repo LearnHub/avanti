@@ -4,6 +4,9 @@
   "description": "Avanti - simple local HTTPS hosting",
   "main": "index.js",
   "type": "module",
+  "bin": {
+    "avanti": "./index.js"
+  },
   "scripts": {
     "start": "node index.js"
   },

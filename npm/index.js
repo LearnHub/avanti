@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Avanti - simple local HTTPS hosting
  */
@@ -6,6 +7,7 @@ import https from 'https'
 import fs from 'fs'
 import path from 'path'
 import mime from 'mime-types'
+import { execSync } from 'child_process'
 
 export const version = '0.1.0'
 
@@ -13,6 +15,31 @@ const CERT_URL = 'https://cert.avncloud.com'
 const CERT_PASSPHRASE = 'avnlan'
 const CERT_CACHE_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.avanti')
 const CERT_PATH = path.join(CERT_CACHE_DIR, 'cert.p12')
+
+/**
+ * Get local IP address (macOS/Linux)
+ */
+function getLocalIP() {
+  try {
+    // Try macOS ipconfig first
+    const ip = execSync('ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null',
+      { encoding: 'utf-8' }).trim()
+    if (ip) return ip
+  } catch (e) {
+    // Silently try next method
+  }
+
+  try {
+    // Try Linux ip command
+    const output = execSync('ip route get 1 2>/dev/null | grep -oP "src \\K\\S+"',
+      { encoding: 'utf-8' }).trim()
+    if (output) return output
+  } catch (e) {
+    // Silently fail
+  }
+
+  return null
+}
 
 /**
  * Download certificate from avncloud.com
@@ -64,7 +91,6 @@ async function getCertificate() {
 export async function serve(options = {}) {
   const {
     port = 8443,
-    host = 'localhost',
     dir = process.cwd(),
     passphrase = ''
   } = options
@@ -116,10 +142,23 @@ export async function serve(options = {}) {
   })
 
   return new Promise((resolve, reject) => {
-    server.listen(port, host, () => {
-      console.log(`Avanti HTTPS server running at https://${host}:${port}/`)
+    server.listen(port, '0.0.0.0', () => {
+      const localIP = getLocalIP()
+      const urls = {
+        local: `https://localhost:${port}/`,
+        ip: localIP ? `https://${localIP}:${port}/` : null,
+        avnlan: localIP ? `https://${localIP.replace(/\./g, '-')}.avnlan.link:${port}/` : null
+      }
+
+      console.log(`Avanti HTTPS server running at https://localhost:${port}/`)
       console.log(`Serving files from: ${dir}`)
-      resolve(server)
+
+      if (localIP) {
+        console.log(`Network access: https://${localIP}:${port}/`)
+        console.log(`VR/Mobile URL:  ${urls.avnlan}`)
+      }
+
+      resolve({ server, urls })
     })
 
     server.on('error', reject)
