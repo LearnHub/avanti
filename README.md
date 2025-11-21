@@ -1,25 +1,16 @@
 # Avanti - Simple Local HTTPS Hosting
 
-A minimal Node.js library for serving static files over HTTPS with automatic certificate management and local network access.
+Avanti runs a HTTPS server locally with no certificate management or external servers.
 
-Perfect for WebXR and VR headset development.
+## Usage
 
-## Quick Start
+Use it from the command line or as a developer dependency from your nodejs projects by following [these instructions](npm/README.md).
 
-```bash
-cd npm
-npm start
-```
+## How it works
 
-The server will display URLs for:
-- Local access: `https://localhost:8443/`
-- Network access: `https://192.168.1.21:8443/` (your local IP)
-- VR/Mobile URL: `https://192-168-1-21.avnlan.link:8443/`
+Avanti downloads a wildcard SSL certificate from cert.avncloud.com that covers `*.avnlan.link` domains. 
 
-## Installation
+The avnlan.link DNS service automatically resolves IP-based subdomains (e.g. `192-168-1-21.avnlan.link`) to local network IP address `192.168.1.21`.
 
-```bash
-npm install avanti
-```
+This allows VR headsets and mobile devices on your local network to access your development server over HTTPS without certificate warnings.
 
-See the [npm/README.md](npm/README.md) for full documentation.
