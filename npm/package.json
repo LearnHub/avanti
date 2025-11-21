@@ -34,6 +34,7 @@
     "index.js",
     "folder.js",
     "cert.js",
+    "network.js",
     "LICENSE"
   ],
   "engines": {
