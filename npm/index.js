@@ -10,10 +10,11 @@ import path from 'path'
 import mime from 'mime-types'
 import { exec } from 'child_process'
 import { promisify } from 'util'
+import { renderFolderListing } from './folder.js'
 
 const execAsync = promisify(exec)
 
-export const version = '0.1.0'
+export const version = '0.2.0'
 
 const HELP_TEXT = `
 Avanti - Simple Local HTTPS Hosting
@@ -149,11 +150,6 @@ export async function serve(options = {}) {
       // Parse URL and remove query string
       let filePath = decodeURIComponent(req.url.split('?')[0])
 
-      // Default to index.html for directory requests
-      if (filePath === '/') {
-        filePath = '/index.html'
-      }
-
       // Construct full file path
       const fullPath = path.join(dir, filePath)
 
@@ -164,21 +160,60 @@ export async function serve(options = {}) {
         return
       }
 
-      // Check if file exists
+      // Check if path exists
+      let stats
       try {
-        const stats = await fsp.stat(fullPath)
-        if (!stats.isFile()) {
-          res.writeHead(404, { 'Content-Type': 'text/plain' })
-          res.end('Not Found')
-          return
-        }
+        stats = await fsp.stat(fullPath)
       } catch {
         res.writeHead(404, { 'Content-Type': 'text/plain' })
         res.end('Not Found')
         return
       }
 
-      // Serve the file
+      // Handle directories
+      if (stats.isDirectory()) {
+        // Try to serve index.html from the directory
+        const indexPath = path.join(fullPath, 'index.html')
+        try {
+          const indexStats = await fsp.stat(indexPath)
+          if (indexStats.isFile()) {
+            const mimeType = 'text/html'
+            res.writeHead(200, { 'Content-Type': mimeType })
+            const fileStream = fs.createReadStream(indexPath)
+            fileStream.pipe(res)
+            return
+          }
+        } catch {
+          // No index.html, show directory listing
+        }
+
+        // Generate directory listing
+        const files = await fsp.readdir(fullPath)
+        const fileStats = await Promise.all(
+          files.map(async (file) => {
+            const filePath = path.join(fullPath, file)
+            const stat = await fsp.stat(filePath)
+            return { name: file, stat }
+          })
+        )
+
+        // Sort: directories first, then files, both alphabetically
+        fileStats.sort((a, b) => {
+          if (a.stat.isDirectory() && !b.stat.isDirectory()) return -1
+          if (!a.stat.isDirectory() && b.stat.isDirectory()) return 1
+          return a.name.localeCompare(b.name)
+        })
+
+        // Generate HTML listing
+        const currentPath = filePath === '/' ? '/' : filePath
+        const html = renderFolderListing(currentPath, fileStats)
+
+        res.writeHead(200, { 'Content-Type': 'text/html' })
+        res.end(html)
+        return
+      }
+
+      // Serve regular files
       const mimeType = mime.lookup(fullPath) || 'application/octet-stream'
       res.writeHead(200, { 'Content-Type': mimeType })
 
