@@ -6,7 +6,7 @@ See https://github.com/LearnHub/avanti for details about how it works.
 
 ## Usage
 
-### As a project script
+### As a node project script
 
 Install in devDependencies
 ```bash
@@ -32,7 +32,7 @@ Then run `npm run start` and browse the URL it gives you:
 https://192-168-1-21.avnlan.link:8443/
 ```
 
-### As a CLI tool
+### As a local CLI tool
 
 Install in devDependencies:
 ```bash
@@ -64,6 +64,22 @@ Examples:
   avanti -p 3000 -d ./public
 ```
 
+### As a global CLI tool
+
+Install globally:
+```bash
+npm install -g @avncloud/avanti
+```
+
+Run from anywhere:
+```bash
+avanti
+```
+
+Uninstall globally:
+```bash
+npm uninstall -g @avncloud/avanti
+```
 
 ### As a library
 
