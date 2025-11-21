@@ -11,6 +11,7 @@ import mime from 'mime-types'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { renderFolderListing } from './folder.js'
+import { getCertificate, getCertificatePassphrase } from './cert.js'
 
 const execAsync = promisify(exec)
 
@@ -32,11 +33,6 @@ Examples:
   avanti --dir ./public
   avanti -p 3000 -d ./public
 `
-
-const CERT_URL = 'https://cert.avncloud.com'
-const CERT_PASSPHRASE = 'avnlan'
-const CERT_CACHE_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.avanti')
-const CERT_PATH = path.join(CERT_CACHE_DIR, 'cert.p12')
 
 /**
  * Get local IP address (macOS/Linux/Windows)
@@ -84,45 +80,6 @@ async function getLocalIP() {
 }
 
 /**
- * Download certificate from avncloud.com
- */
-async function downloadCertificate() {
-  const response = await fetch(CERT_URL)
-  if (!response.ok) {
-    throw new Error(`Failed to download certificate: ${response.statusText}`)
-  }
-
-  const certBuffer = Buffer.from(await response.arrayBuffer())
-
-  // Ensure cache directory exists
-  await fsp.mkdir(CERT_CACHE_DIR, { recursive: true })
-  await fsp.writeFile(CERT_PATH, certBuffer)
-
-  return certBuffer
-}
-
-/**
- * Get certificate (from cache or download)
- */
-async function getCertificate() {
-  // Check if cached certificate exists and is less than 24 hours old
-  try {
-    const stats = await fsp.stat(CERT_PATH)
-    const age = Date.now() - stats.mtimeMs
-    const maxAge = 24 * 60 * 60 * 1000 // 24 hours
-
-    if (age < maxAge) {
-      return await fsp.readFile(CERT_PATH)
-    }
-  } catch {
-    // File doesn't exist, download it
-  }
-
-  return downloadCertificate()
-}
-
-
-/**
  * Start HTTPS server
  */
 export async function serve(options = {}) {
@@ -142,7 +99,7 @@ export async function serve(options = {}) {
 
   const serverOptions = {
     pfx: certBuffer,
-    passphrase: CERT_PASSPHRASE
+    passphrase: getCertificatePassphrase()
   }
 
   const server = https.createServer(serverOptions, async (req, res) => {
