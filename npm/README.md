@@ -43,8 +43,7 @@ import { serve } from 'avanti'
 
 const { server, url } = await serve({
   port: 8443,
-  dir: './public',
-  passphrase: 'avnlan'
+  dir: './public'
 })
 
 console.log('Network URL:', url)
@@ -60,7 +59,6 @@ Starts an HTTPS server serving static files.
 **Options:**
 - `port` (number, optional): Port to listen on. Defaults to `8443`.
 - `dir` (string, optional): Directory to serve files from. Defaults to current directory.
-- `passphrase` (string, optional): Certificate passphrase. Defaults to `''`.
 
 **Returns:** Promise resolving to an object with:
 - `server`: The HTTPS server instance

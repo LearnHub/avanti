@@ -1,6 +1,5 @@
-test.js
 .gitignore
 .editorconfig
-*.test.js
+test/
 coverage/
 .env

@@ -91,67 +91,75 @@ async function getCertificate() {
 export async function serve(options = {}) {
   const {
     port = 8443,
-    dir = process.cwd(),
-    passphrase = ''
+    dir = process.cwd()
   } = options
+
+  const localIP = getLocalIP()
+  if (!localIP) {
+    throw new Error('Failed to detect local IP address')
+  }
+
+  const url = `https://${localIP.replace(/\./g, '-')}.avnlan.link:${port}/`
 
   const certBuffer = await getCertificate()
 
   const serverOptions = {
     pfx: certBuffer,
-    passphrase: passphrase
+    passphrase: CERT_PASSPHRASE
   }
 
   const server = https.createServer(serverOptions, (req, res) => {
-    // Parse URL and remove query string
-    let filePath = decodeURIComponent(req.url.split('?')[0])
+    try {
+      // Parse URL and remove query string
+      let filePath = decodeURIComponent(req.url.split('?')[0])
 
-    // Default to index.html for directory requests
-    if (filePath === '/') {
-      filePath = '/index.html'
-    }
+      // Default to index.html for directory requests
+      if (filePath === '/') {
+        filePath = '/index.html'
+      }
 
-    // Construct full file path
-    const fullPath = path.join(dir, filePath)
+      // Construct full file path
+      const fullPath = path.join(dir, filePath)
 
-    // Prevent directory traversal attacks
-    if (!fullPath.startsWith(dir)) {
-      res.writeHead(403, { 'Content-Type': 'text/plain' })
-      res.end('Forbidden')
-      return
-    }
-
-    // Check if file exists
-    fs.stat(fullPath, (err, stats) => {
-      if (err || !stats.isFile()) {
-        res.writeHead(404, { 'Content-Type': 'text/plain' })
-        res.end('Not Found')
-        console.log('404:', filePath)
+      // Prevent directory traversal attacks
+      if (!fullPath.startsWith(dir)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' })
+        res.end('Forbidden')
         return
       }
 
-      // Serve the file
-      const mimeType = mime.lookup(fullPath) || 'application/octet-stream'
-      res.writeHead(200, { 'Content-Type': mimeType })
+      // Check if file exists
+      fs.stat(fullPath, (err, stats) => {
+        if (err || !stats.isFile()) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' })
+          res.end('Not Found')
+          console.log('404:', filePath)
+          return
+        }
 
-      const fileStream = fs.createReadStream(fullPath)
-      fileStream.pipe(res)
+        // Serve the file
+        const mimeType = mime.lookup(fullPath) || 'application/octet-stream'
+        res.writeHead(200, { 'Content-Type': mimeType })
 
-      console.log('200:', filePath)
-    })
+        const fileStream = fs.createReadStream(fullPath)
+        fileStream.pipe(res)
+
+        console.log('200:', filePath)
+      })
+    } catch (error) {
+      console.error('Request handler error:', error)
+      if (!res.headersSent) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' })
+        res.end('Internal Server Error')
+      }
+    }
   })
 
   return new Promise((resolve, reject) => {
     server.listen(port, '0.0.0.0', () => {
-      const localIP = getLocalIP()
-      const url = localIP ? `https://${localIP.replace(/\./g, '-')}.avnlan.link:${port}/` : null
-
       console.log(`Avanti HTTPS server running at https://localhost:${port}/`)
       console.log(`Serving files from: ${dir}`)
-
-      if (url) {
-        console.log(`Network URL: ${url}`)
-      }
+      console.log(`Network URL: ${url}`)
 
       resolve({ server, url })
     })
@@ -167,7 +175,7 @@ export default {
 
 // CLI mode - run server if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  serve({ passphrase: CERT_PASSPHRASE }).catch(err => {
+  serve().catch(err => {
     console.error('Failed to start server:', err)
     process.exit(1)
   })
