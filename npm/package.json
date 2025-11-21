@@ -1,5 +1,5 @@
 {
-  "name": "avanti",
+  "name": "@avn/avanti",
   "version": "0.1.0",
   "description": "Avanti - simple local HTTPS hosting",
   "main": "index.js",
@@ -10,9 +10,10 @@
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [
-    "avanti"
+  "keywords": [ 
+    "https", "server", "static", "local", "localhost", "development", "ssl", "certificate" 
   ],
+  "homepage": "https://github.com/LearnHub/avanti",
   "author": "Avantis Development <development@avantiseducation.com> (https://www.avantiseducation.com)",
   "license": "MIT",
   "repository": {

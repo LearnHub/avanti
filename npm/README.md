@@ -10,7 +10,7 @@ See https://github.com/LearnHub/avanti for details about how it works.
 
 Install in devDependencies
 ```bash
-npm install --save-dev avanti
+npm install --save-dev @avn/avanti
 ```
 
 Update package.json
@@ -36,7 +36,7 @@ https://192-168-1-21.avnlan.link:8443/
 
 Install in devDependencies:
 ```bash
-npm install --save-dev avanti
+npm install --save-dev @avn/avanti
 ```
 
 Run from project folder to start serving files:
@@ -69,11 +69,11 @@ Examples:
 
 Install in dependencies:
 ```bash
-npm install --save-dev avanti
+npm install @avn/avanti
 ```
 
 ```javascript
-import { serve } from 'avanti'
+import { serve } from '@avn/avanti'
 
 const { server, url } = await serve({
   port: 8443,
