@@ -50,16 +50,15 @@ async function downloadCertificate() {
     throw new Error(`Failed to download certificate: ${response.statusText}`)
   }
 
-  const buffer = await response.arrayBuffer()
+  const certBuffer = Buffer.from(await response.arrayBuffer())
 
   // Ensure cache directory exists
   if (!fs.existsSync(CERT_CACHE_DIR)) {
     fs.mkdirSync(CERT_CACHE_DIR, { recursive: true })
   }
+  fs.writeFileSync(CERT_PATH, certBuffer)
 
-  fs.writeFileSync(CERT_PATH, Buffer.from(buffer))
-
-  return Buffer.from(buffer)
+  return certBuffer
 }
 
 /**
@@ -150,7 +149,7 @@ export async function serve(options = {}) {
 
   return new Promise((resolve, reject) => {
     server.listen(port, '0.0.0.0', () => {
-      resolve({ server, url })
+        resolve({ server, url })
     })
 
     server.on('error', reject)
