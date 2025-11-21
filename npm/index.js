@@ -4,10 +4,13 @@
  */
 
 import https from 'https'
-import fs from 'fs'
+import fs from 'node:fs/promises'
 import path from 'path'
 import mime from 'mime-types'
-import { execSync } from 'child_process'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+
+const execAsync = promisify(exec)
 
 export const version = '0.1.0'
 
@@ -19,11 +22,12 @@ const CERT_PATH = path.join(CERT_CACHE_DIR, 'cert.p12')
 /**
  * Get local IP address (macOS/Linux)
  */
-function getLocalIP() {
+async function getLocalIP() {
   try {
     // Try macOS ipconfig first
-    const ip = execSync('ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null',
-      { encoding: 'utf-8' }).trim()
+    const { stdout } = await execAsync('ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null',
+      { encoding: 'utf-8' })
+    const ip = stdout.trim()
     if (ip) return ip
   } catch (e) {
     // Silently try next method
@@ -31,8 +35,9 @@ function getLocalIP() {
 
   try {
     // Try Linux ip command
-    const output = execSync('ip route get 1 2>/dev/null | grep -oP "src \\K\\S+"',
-      { encoding: 'utf-8' }).trim()
+    const { stdout } = await execAsync('ip route get 1 2>/dev/null | grep -oP "src \\K\\S+"',
+      { encoding: 'utf-8' })
+    const output = stdout.trim()
     if (output) return output
   } catch (e) {
     // Silently fail
@@ -53,10 +58,8 @@ async function downloadCertificate() {
   const certBuffer = Buffer.from(await response.arrayBuffer())
 
   // Ensure cache directory exists
-  if (!fs.existsSync(CERT_CACHE_DIR)) {
-    fs.mkdirSync(CERT_CACHE_DIR, { recursive: true })
-  }
-  fs.writeFileSync(CERT_PATH, certBuffer)
+  await fs.mkdir(CERT_CACHE_DIR, { recursive: true })
+  await fs.writeFile(CERT_PATH, certBuffer)
 
   return certBuffer
 }
@@ -66,17 +69,19 @@ async function downloadCertificate() {
  */
 async function getCertificate() {
   // Check if cached certificate exists and is less than 24 hours old
-  if (fs.existsSync(CERT_PATH)) {
-    const stats = fs.statSync(CERT_PATH)
+  try {
+    const stats = await fs.stat(CERT_PATH)
     const age = Date.now() - stats.mtimeMs
     const maxAge = 24 * 60 * 60 * 1000 // 24 hours
 
     if (age < maxAge) {
-      return fs.readFileSync(CERT_PATH)
+      return await fs.readFile(CERT_PATH)
     }
+  } catch {
+    // File doesn't exist, download it
   }
 
-  return await downloadCertificate()
+  return downloadCertificate()
 }
 
 
@@ -89,7 +94,7 @@ export async function serve(options = {}) {
     dir = process.cwd()
   } = options
 
-  const localIP = getLocalIP()
+  const localIP = await getLocalIP()
   if (!localIP) {
     throw new Error('Failed to detect local IP address')
   }
@@ -103,7 +108,7 @@ export async function serve(options = {}) {
     passphrase: CERT_PASSPHRASE
   }
 
-  const server = https.createServer(serverOptions, (req, res) => {
+  const server = https.createServer(serverOptions, async (req, res) => {
     try {
       // Parse URL and remove query string
       let filePath = decodeURIComponent(req.url.split('?')[0])
@@ -124,20 +129,25 @@ export async function serve(options = {}) {
       }
 
       // Check if file exists
-      fs.stat(fullPath, (err, stats) => {
-        if (err || !stats.isFile()) {
+      try {
+        const stats = await fs.stat(fullPath)
+        if (!stats.isFile()) {
           res.writeHead(404, { 'Content-Type': 'text/plain' })
           res.end('Not Found')
           return
         }
+      } catch {
+        res.writeHead(404, { 'Content-Type': 'text/plain' })
+        res.end('Not Found')
+        return
+      }
 
-        // Serve the file
-        const mimeType = mime.lookup(fullPath) || 'application/octet-stream'
-        res.writeHead(200, { 'Content-Type': mimeType })
+      // Serve the file
+      const mimeType = mime.lookup(fullPath) || 'application/octet-stream'
+      res.writeHead(200, { 'Content-Type': mimeType })
 
-        const fileStream = fs.createReadStream(fullPath)
-        fileStream.pipe(res)
-      })
+      const fileStream = fs.createReadStream(fullPath)
+      fileStream.pipe(res)
     } catch (error) {
       console.error('Request handler error:', error)
       if (!res.headersSent) {
