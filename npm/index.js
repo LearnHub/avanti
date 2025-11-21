@@ -4,7 +4,8 @@
  */
 
 import https from 'https'
-import fs from 'node:fs/promises'
+import fs from 'fs'
+import fsp from 'node:fs/promises'
 import path from 'path'
 import mime from 'mime-types'
 import { exec } from 'child_process'
@@ -75,8 +76,8 @@ async function downloadCertificate() {
   const certBuffer = Buffer.from(await response.arrayBuffer())
 
   // Ensure cache directory exists
-  await fs.mkdir(CERT_CACHE_DIR, { recursive: true })
-  await fs.writeFile(CERT_PATH, certBuffer)
+  await fsp.mkdir(CERT_CACHE_DIR, { recursive: true })
+  await fsp.writeFile(CERT_PATH, certBuffer)
 
   return certBuffer
 }
@@ -87,12 +88,12 @@ async function downloadCertificate() {
 async function getCertificate() {
   // Check if cached certificate exists and is less than 24 hours old
   try {
-    const stats = await fs.stat(CERT_PATH)
+    const stats = await fsp.stat(CERT_PATH)
     const age = Date.now() - stats.mtimeMs
     const maxAge = 24 * 60 * 60 * 1000 // 24 hours
 
     if (age < maxAge) {
-      return await fs.readFile(CERT_PATH)
+      return await fsp.readFile(CERT_PATH)
     }
   } catch {
     // File doesn't exist, download it
@@ -147,7 +148,7 @@ export async function serve(options = {}) {
 
       // Check if file exists
       try {
-        const stats = await fs.stat(fullPath)
+        const stats = await fsp.stat(fullPath)
         if (!stats.isFile()) {
           res.writeHead(404, { 'Content-Type': 'text/plain' })
           res.end('Not Found')
@@ -189,7 +190,7 @@ export default {
 }
 
 // CLI mode - run server if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.main) {
   // Parse command line arguments
   const args = process.argv.slice(2)
   const options = {}
@@ -208,7 +209,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   serve(options).then(result => {
-    console.log(result.url)    
+    console.log(result.url) 
   }).catch(err => {
     console.error('Failed to start server:', err)
     process.exit(1)
