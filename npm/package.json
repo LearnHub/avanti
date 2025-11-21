@@ -1,5 +1,5 @@
 {
-  "name": "@avn/avanti",
+  "name": "@avncloud/avanti",
   "version": "0.1.0",
   "description": "Avanti - simple local HTTPS hosting",
   "main": "index.js",
