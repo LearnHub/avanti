@@ -2,16 +2,16 @@
 
 A minimal Node.js library for serving static files over HTTPS with automatic certificate management and local network access.
 
-## Installation
-
-```bash
-npm install --save-dev avanti
-```
-
 ## Usage
 
 ### As a project script
 
+Install in devDependencies
+```bash
+npm install --save-dev avanti
+```
+
+In package.json
 ```json
 {
   "scripts": {
@@ -24,11 +24,22 @@ Then run: `npm run start`
 
 ### As a CLI tool
 
+Install in devDependencies
+```bash
+npm install --save-dev avanti
+```
+
+Run from project folder
 ```bash
 npx avanti
 ```
 
 ### As a library
+
+Install in dependencies
+```bash
+npm install --save-dev avanti
+```
 
 ```javascript
 import { serve } from 'avanti'
