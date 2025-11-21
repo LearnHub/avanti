@@ -2,7 +2,7 @@
 
 A minimal Node.js library for serving static files over HTTPS with automatic certificate management and local network access.
 
-See https://github.com/LearnHub/avanti for details about how it works under the hood.
+See [the project homepage](https://github.com/LearnHub/avanti) for details about how it works under the hood.
 
 ## Usage
 

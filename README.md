@@ -4,7 +4,7 @@ Avanti runs a HTTPS server locally with no certificate management or external se
 
 ## Usage
 
-Use it from the command line or as a developer dependency from your nodejs projects by following [these instructions](npm/README.md).
+Use it from the command line or as a nodejs project dependency by following [these instructions](npm/README.md).
 
 ## How it works
 
@@ -18,21 +18,21 @@ This allows any device on your local network to access the development server ov
 
 TL;DR: Don't use avanti for production hosting.
 
-To make this system work we need to distribute the private half of our SSL certificate.
+To make this system work we need to distribute the private half of an SSL certificate.
 This means that communication between your development machine and other devices should be considered insecure,
 but as you will typically have physical access to all the devices involved this isn't really a problem.
 
 Compare it to something like [ngrok](https://ngrok.com/docs/getting-started),
 which on the face of it seems secure because the private key stays private,
 but in reality the ngrok servers can inspect your traffic and could even inject malicious content.
-In fact with avanti the data never leaves your LAN, which reduces any threat significantly.
+In fact with avanti the data never leaves your LAN, which is actually more secure.
 
 ## Caveats
 
 ### Legacy routers
 
 Some routers, usually domestic ones, refuse to resolve private network addresses.
-This is because there are historical threat vectors that could attack unsecured local devices from your browser.
+This is because there are historical threat vectors that targeted unsecured local devices from your browser.
 This isn't possible in modern browsers anymore due to initiatives like [PNA](https://wicg.github.io/private-network-access/) and [LNA](https://wicg.github.io/local-network-access/), but the routers have yet to catch up.
 
 To get around this you will need to take control of your own DNS.
