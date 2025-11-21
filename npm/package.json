@@ -14,8 +14,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/LearnHub.git",
-    "directory": "avanti/npm"
+    "url": "https://github.com/LearnHub/avanti.git",
+    "directory": "npm"
   },
   "files": [
     "index.js"
