@@ -2,6 +2,8 @@
 
 A minimal Node.js library for serving static files over HTTPS with automatic certificate management and local network access.
 
+See https://github.com/LearnHub/avanti for details about how it works.
+
 ## Usage
 
 ### As a project script
@@ -11,7 +13,7 @@ Install in devDependencies
 npm install --save-dev avanti
 ```
 
-In package.json
+Update package.json
 ```json
 {
   "scripts": {
@@ -20,23 +22,52 @@ In package.json
 }
 ```
 
-Then run: `npm run start`
+Then run `npm run start` and browse the URL it gives you:
+```bash
+% npm run start
+
+> coolproject@1.0.0 start
+> avanti
+
+https://192-168-1-21.avnlan.link:8443/
+```
 
 ### As a CLI tool
 
-Install in devDependencies
+Install in devDependencies:
 ```bash
 npm install --save-dev avanti
 ```
 
-Run from project folder
+Run from project folder to start serving files:
 ```bash
 npx avanti
 ```
 
+Get more command line options using the help option:
+```bash
+npx avanti --help
+
+Avanti - Simple Local HTTPS Hosting
+
+Usage: avanti [options]
+
+Options:
+  -p, --port <number>    Port to listen on (default: 8443)
+  -d, --dir <path>       Directory to serve (default: current directory)
+  -h, --help             Show this help message
+
+Examples:
+  avanti
+  avanti --port 3000
+  avanti --dir ./public
+  avanti -p 3000 -d ./public
+```
+
+
 ### As a library
 
-Install in dependencies
+Install in dependencies:
 ```bash
 npm install --save-dev avanti
 ```
@@ -53,8 +84,6 @@ console.log('Network URL:', url)
 // e.g., https://192-168-1-21.avnlan.link:8443/
 ```
 
-## API
-
 ### `serve(options)`
 
 Starts an HTTPS server serving static files.
@@ -70,3 +99,5 @@ Starts an HTTPS server serving static files.
 ## License
 
 MIT
+
+Avanti is provided by [Avantis Education](https://www.avantiseducation.com/) as-is and without any guarantees or obligations.
