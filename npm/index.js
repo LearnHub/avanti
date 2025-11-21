@@ -144,21 +144,16 @@ export async function serve(options = {}) {
   return new Promise((resolve, reject) => {
     server.listen(port, '0.0.0.0', () => {
       const localIP = getLocalIP()
-      const urls = {
-        local: `https://localhost:${port}/`,
-        ip: localIP ? `https://${localIP}:${port}/` : null,
-        avnlan: localIP ? `https://${localIP.replace(/\./g, '-')}.avnlan.link:${port}/` : null
-      }
+      const url = localIP ? `https://${localIP.replace(/\./g, '-')}.avnlan.link:${port}/` : null
 
       console.log(`Avanti HTTPS server running at https://localhost:${port}/`)
       console.log(`Serving files from: ${dir}`)
 
-      if (localIP) {
-        console.log(`Network access: https://${localIP}:${port}/`)
-        console.log(`VR/Mobile URL:  ${urls.avnlan}`)
+      if (url) {
+        console.log(`Network URL: ${url}`)
       }
 
-      resolve({ server, urls })
+      resolve({ server, url })
     })
 
     server.on('error', reject)

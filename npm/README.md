@@ -41,15 +41,14 @@ Then run: `npm run serve`
 ```javascript
 import { serve } from 'avanti'
 
-const { server, urls } = await serve({
+const { server, url } = await serve({
   port: 8443,
   dir: './public',
   passphrase: 'avnlan'
 })
 
-console.log('Local:', urls.local)
-console.log('Network:', urls.ip)
-console.log('VR/Mobile:', urls.avnlan)
+console.log('Network URL:', url)
+// e.g., https://192-168-1-21.avnlan.link:8443/
 ```
 
 ## API
@@ -65,10 +64,7 @@ Starts an HTTPS server serving static files.
 
 **Returns:** Promise resolving to an object with:
 - `server`: The HTTPS server instance
-- `urls`: Object containing:
-  - `local`: `https://localhost:8443/`
-  - `ip`: `https://192.168.1.21:8443/` (your local IP)
-  - `avnlan`: `https://192-168-1-21.avnlan.link:8443/` (VR-accessible URL)
+- `url`: The avnlan.link network URL (e.g., `https://192-168-1-21.avnlan.link:8443/`)
 
 ## How it works
 
