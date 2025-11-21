@@ -14,6 +14,23 @@ const execAsync = promisify(exec)
 
 export const version = '0.1.0'
 
+const HELP_TEXT = `
+Avanti - Simple Local HTTPS Hosting
+
+Usage: avanti [options]
+
+Options:
+  -p, --port <number>    Port to listen on (default: 8443)
+  -d, --dir <path>       Directory to serve (default: current directory)
+  -h, --help             Show this help message
+
+Examples:
+  avanti
+  avanti --port 3000
+  avanti --dir ./public
+  avanti -p 3000 -d ./public
+`
+
 const CERT_URL = 'https://cert.avncloud.com'
 const CERT_PASSPHRASE = 'avnlan'
 const CERT_CACHE_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.avanti')
@@ -185,22 +202,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     } else if (arg === '--dir' || arg === '-d') {
       options.dir = args[++i]
     } else if (arg === '--help' || arg === '-h') {
-      console.log(`
-Avanti - Simple Local HTTPS Hosting
-
-Usage: avanti [options]
-
-Options:
-  -p, --port <number>    Port to listen on (default: 8443)
-  -d, --dir <path>       Directory to serve (default: current directory)
-  -h, --help             Show this help message
-
-Examples:
-  avanti
-  avanti --port 3000
-  avanti --dir ./public
-  avanti -p 3000 -d ./public
-      `)
+      console.log(HELP_TEXT)
       process.exit(0)
     }
   }
