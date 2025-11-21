@@ -38,11 +38,11 @@ const CERT_CACHE_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.
 const CERT_PATH = path.join(CERT_CACHE_DIR, 'cert.p12')
 
 /**
- * Get local IP address (macOS/Linux)
+ * Get local IP address (macOS/Linux/Windows)
  */
 async function getLocalIP() {
+  // Try macOS ipconfig first
   try {
-    // Try macOS ipconfig first
     const { stdout } = await execAsync('ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null',
       { encoding: 'utf-8' })
     const ip = stdout.trim()
@@ -51,12 +51,30 @@ async function getLocalIP() {
     // Silently try next method
   }
 
+  // Try Linux ip command
   try {
-    // Try Linux ip command
     const { stdout } = await execAsync('ip route get 1 2>/dev/null | grep -oP "src \\K\\S+"',
       { encoding: 'utf-8' })
     const output = stdout.trim()
     if (output) return output
+  } catch (e) {
+    // Silently try next method
+  }
+
+  // Try Windows ipconfig
+  try {
+    const { stdout } = await execAsync('ipconfig',
+      { encoding: 'utf-8' })
+
+    // Look for IPv4 Address in the output
+    const match = stdout.match(/IPv4 Address[.\s]*:\s*(\d+\.\d+\.\d+\.\d+)/i)
+    if (match && match[1]) {
+      const ip = match[1]
+      // Exclude loopback addresses
+      if (!ip.startsWith('127.')) {
+        return ip
+      }
+    }
   } catch (e) {
     // Silently fail
   }
