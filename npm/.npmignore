@@ -1,5 +1,5 @@
 .gitignore
 .editorconfig
-test/
-coverage/
+test.js
 .env
+*.tgz
