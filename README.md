@@ -16,16 +16,16 @@ This allows other devices on your local network to access your development serve
 
 ### Security
 
-TL;DR: Don't host use avanti for production hosting.
+TL;DR: Don't use avanti for production hosting.
 
 To make this system work we need to distribute the private part of the SSL certificate.
 This means that communication between your development machine and other devices should be considered insecure,
 but as you will typically have physical access to all the devices involved this isn't really a problem.
 
-Compare it something like [ngrok](https://ngrok.com/docs/getting-started),
+Compare it to something like [ngrok](https://ngrok.com/docs/getting-started),
 which on the face of it seems secure because the private key stays private,
 but in reality the ngrok server can inspect the traffic and could even inject malicious content.
-In fact with avanti the data never leaves you LAN, which reduces any threat significantly.
+In fact with avanti the data never leaves your LAN, which reduces any threat significantly.
 
 ## Caveats
 
