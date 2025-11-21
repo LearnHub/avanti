@@ -8,23 +8,23 @@ Use it from the command line or as a developer dependency from your nodejs proje
 
 ## How it works
 
-Avanti downloads a wildcard SSL certificate from cert.avncloud.com that covers the `*.avnlan.link` domains. 
+Avanti uses a wildcard SSL certificate for the `*.avnlan.link` domain. 
 
-The avnlan.link custom DNS service resolves IP-formatted subdomains like `192-168-1-21.avnlan.link` to local network IP address like `192.168.1.21`.
+A custom DNS service resolves IP-formatted subdomains like `192-168-1-21.avnlan.link` to local network IP address like `192.168.1.21`.
 
-This allows other devices on your local network to access your development server over HTTPS without certificate warnings.
+This allows any device on your local network to access your development server over HTTPS without certificate warnings.
 
 ### Security
 
 TL;DR: Don't use avanti for production hosting.
 
-To make this system work we need to distribute the private part of the SSL certificate.
+To make this system work we need to distribute the private half of our SSL certificate.
 This means that communication between your development machine and other devices should be considered insecure,
 but as you will typically have physical access to all the devices involved this isn't really a problem.
 
 Compare it to something like [ngrok](https://ngrok.com/docs/getting-started),
 which on the face of it seems secure because the private key stays private,
-but in reality the ngrok server can inspect the traffic and could even inject malicious content.
+but in reality the ngrok servers can inspect your traffic and could even inject malicious content.
 In fact with avanti the data never leaves your LAN, which reduces any threat significantly.
 
 ## Caveats
@@ -39,5 +39,6 @@ To get around this you will need to take control of your own DNS.
 
 ### Public access
 
-One advantage ngrok has over avanti is that the access URL can be shared publicly.
-It would be possible to share public links if you punched a hole in your firewall; let us know if this is something you are interested in doing.
+One advantage ngrok has over avanti is that the URLs can be accessed publicly.
+
+It would actually be possible to share public links if you punched a hole in your firewall; let us know if this is something you are interested in doing.
