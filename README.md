@@ -35,7 +35,7 @@ Some routers, usually domestic ones, refuse to resolve private network addresses
 This is because there are historical threat vectors that targeted unsecured local devices from your browser.
 This isn't possible in modern browsers anymore due to initiatives like [PNA](https://wicg.github.io/private-network-access/) and [LNA](https://wicg.github.io/local-network-access/), but the routers have yet to catch up.
 
-To get around this you will need to take control of your own DNS.
+To get around this you will need to take control of your own DNS settings.
 
 ### Public access
 
