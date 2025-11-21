@@ -167,6 +167,11 @@ if (import.meta.main) {
     } else if (arg === '--help' || arg === '-h') {
       console.log(HELP_TEXT)
       process.exit(0)
+    } else {
+      console.error(`Error: Unknown option '${arg}'`)
+      console.error('')
+      console.log(HELP_TEXT)
+      process.exit(1)
     }
   }
 
