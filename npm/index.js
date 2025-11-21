@@ -44,8 +44,8 @@ function getLocalIP() {
 /**
  * Download certificate from avncloud.com
  */
-async function downloadCertificate() {
-  console.log('Downloading certificate from', CERT_URL)
+async function downloadCertificate(verbose = false) {
+  if (verbose) console.log('Downloading certificate from', CERT_URL)
 
   const response = await fetch(CERT_URL)
   if (!response.ok) {
@@ -60,7 +60,7 @@ async function downloadCertificate() {
   }
 
   fs.writeFileSync(CERT_PATH, Buffer.from(buffer))
-  console.log('Certificate cached at', CERT_PATH)
+  if (verbose) console.log('Certificate cached at', CERT_PATH)
 
   return Buffer.from(buffer)
 }
@@ -68,7 +68,7 @@ async function downloadCertificate() {
 /**
  * Get certificate (from cache or download)
  */
-async function getCertificate() {
+async function getCertificate(verbose = false) {
   // Check if cached certificate exists and is less than 24 hours old
   if (fs.existsSync(CERT_PATH)) {
     const stats = fs.statSync(CERT_PATH)
@@ -76,12 +76,12 @@ async function getCertificate() {
     const maxAge = 24 * 60 * 60 * 1000 // 24 hours
 
     if (age < maxAge) {
-      console.log('Using cached certificate')
+      if (verbose) console.log('Using cached certificate')
       return fs.readFileSync(CERT_PATH)
     }
   }
 
-  return await downloadCertificate()
+  return await downloadCertificate(verbose)
 }
 
 
@@ -91,7 +91,8 @@ async function getCertificate() {
 export async function serve(options = {}) {
   const {
     port = 8443,
-    dir = process.cwd()
+    dir = process.cwd(),
+    verbose = false
   } = options
 
   const localIP = getLocalIP()
@@ -101,7 +102,7 @@ export async function serve(options = {}) {
 
   const url = `https://${localIP.replace(/\./g, '-')}.avnlan.link:${port}/`
 
-  const certBuffer = await getCertificate()
+  const certBuffer = await getCertificate(verbose)
 
   const serverOptions = {
     pfx: certBuffer,
@@ -133,7 +134,7 @@ export async function serve(options = {}) {
         if (err || !stats.isFile()) {
           res.writeHead(404, { 'Content-Type': 'text/plain' })
           res.end('Not Found')
-          console.log('404:', filePath)
+          if (verbose) console.log('404:', filePath)
           return
         }
 
@@ -144,7 +145,7 @@ export async function serve(options = {}) {
         const fileStream = fs.createReadStream(fullPath)
         fileStream.pipe(res)
 
-        console.log('200:', filePath)
+        if (verbose) console.log('200:', filePath)
       })
     } catch (error) {
       console.error('Request handler error:', error)
@@ -157,9 +158,13 @@ export async function serve(options = {}) {
 
   return new Promise((resolve, reject) => {
     server.listen(port, '0.0.0.0', () => {
-      console.log(`Avanti HTTPS server running at https://localhost:${port}/`)
-      console.log(`Serving files from: ${dir}`)
-      console.log(`Network URL: ${url}`)
+      if (verbose) {
+        console.log(`Avanti HTTPS server running at https://localhost:${port}/`)
+        console.log(`Serving files from: ${dir}`)
+        console.log(`Network URL: ${url}`)
+      } else {
+        console.log(url)
+      }
 
       resolve({ server, url })
     })
@@ -175,7 +180,43 @@ export default {
 
 // CLI mode - run server if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  serve().catch(err => {
+  // Parse command line arguments
+  const args = process.argv.slice(2)
+  const options = {}
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+
+    if (arg === '--port' || arg === '-p') {
+      options.port = parseInt(args[++i], 10)
+    } else if (arg === '--dir' || arg === '-d') {
+      options.dir = args[++i]
+    } else if (arg === '--verbose' || arg === '-v') {
+      options.verbose = true
+    } else if (arg === '--help' || arg === '-h') {
+      console.log(`
+Avanti - Simple Local HTTPS Hosting
+
+Usage: avanti [options]
+
+Options:
+  -p, --port <number>    Port to listen on (default: 8443)
+  -d, --dir <path>       Directory to serve (default: current directory)
+  -v, --verbose          Show detailed logging
+  -h, --help             Show this help message
+
+Examples:
+  avanti
+  avanti --port 3000
+  avanti --dir ./public
+  avanti --verbose
+  avanti -p 3000 -d ./public -v
+      `)
+      process.exit(0)
+    }
+  }
+
+  serve(options).catch(err => {
     console.error('Failed to start server:', err)
     process.exit(1)
   })
