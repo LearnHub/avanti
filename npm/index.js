@@ -12,7 +12,7 @@ import { renderFolderListing } from './folder.js'
 import { getCertificate, getCertificatePassphrase } from './cert.js'
 import { getLocalIP } from './network.js'
 
-export const version = '0.2.0'
+export const version = '0.2.1'
 
 const HELP_TEXT = `
 Avanti - Simple Local HTTPS Hosting

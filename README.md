@@ -10,9 +10,9 @@ Use it from the command line or as a developer dependency from your nodejs proje
 
 Avanti uses a wildcard SSL certificate for the `*.avnlan.link` domain. 
 
-A custom DNS service resolves IP-formatted subdomains like `192-168-1-21.avnlan.link` to local network IP address like `192.168.1.21`.
+A custom DNS service resolves IP-formatted subdomains like `192-168-1-21.avnlan.link` to local network IP addresses like `192.168.1.21`.
 
-This allows any device on your local network to access your development server over HTTPS without certificate warnings.
+This allows any device on your local network to access the development server over HTTPS without certificate warnings.
 
 ### Security
 
