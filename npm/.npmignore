@@ -1,0 +1,6 @@
+test.js
+.gitignore
+.editorconfig
+*.test.js
+coverage/
+.env

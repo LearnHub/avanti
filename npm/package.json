@@ -1,0 +1,29 @@
+{
+  "name": "avanti",
+  "version": "0.1.0",
+  "description": "Avanti - simple local HTTPS hosting",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "avanti"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/LearnHub.git",
+    "directory": "avanti/npm"
+  },
+  "files": [
+    "index.js"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "mime-types": "^3.0.2"
+  }
+}
