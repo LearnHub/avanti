@@ -1,6 +1,6 @@
 {
   "name": "@avncloud/avanti",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Avanti - simple local HTTPS hosting",
   "main": "index.js",
   "type": "module",
